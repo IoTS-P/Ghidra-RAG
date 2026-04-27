@@ -155,6 +155,37 @@ with GhidraRAGClient(base_url="http://localhost:8000") as client:
 | `GHIDRA_RAG_HOST` | `0.0.0.0` | Server host |
 | `GHIDRA_RAG_PORT` | `8000` | Server port |
 
+## Skills for LLM Agents
+
+This project includes a skill definition for LLM agents (like OpenCode, Cursor, etc.) to use this RAG system.
+
+### Skill Location
+
+```
+skills/ghidra_rag/
+├── SKILL.md      # Skill definition for LLM agents
+└── config.json   # RAG server configuration
+```
+
+### Supported Platforms
+
+Copy the `skills/ghidra_rag/` directory to your LLM platform's skills directory:
+
+- **OpenCode**: `~/.opencode/skills/` or `.opencode/skills/`
+- **Cursor**: `.cursor/skills/`
+- **Other**: Follow your platform's skill loading conventions
+
+### Usage
+
+When using the skill, the LLM agent can:
+
+1. Read `config.json` to get the RAG server address
+2. Query available Ghidra versions via `/api/v1/versions`
+3. Perform semantic search on API and documentation
+4. Query class hierarchies, methods, and fields
+
+See `skills/ghidra_rag/SKILL.md` for the complete skill specification.
+
 ## License
 
 MIT

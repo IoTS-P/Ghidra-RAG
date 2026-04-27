@@ -153,6 +153,37 @@ with GhidraRAGClient(base_url="http://localhost:8000") as client:
 | `GHIDRA_RAG_HOST` | `0.0.0.0` | 服务器主机 |
 | `GHIDRA_RAG_PORT` | `8000` | 服务器端口 |
 
+## LLM Agent Skills
+
+本项目包含供 LLM Agent（如 OpenCode、Cursor 等）使用的 skill 定义。
+
+### Skill 位置
+
+```
+skills/ghidra_rag/
+├── SKILL.md      # Skill 定义文件
+└── config.json   # RAG 服务器配置
+```
+
+### 支持的平台
+
+将 `skills/ghidra_rag/` 目录复制到你的 LLM 平台的 skills 目录：
+
+- **OpenCode**: `~/.opencode/skills/` 或 `.opencode/skills/`
+- **Cursor**: `.cursor/skills/`
+- **其他平台**: 请参考对应平台的 skill 加载规范
+
+### 使用方式
+
+LLM Agent 使用该 skill 时可以：
+
+1. 读取 `config.json` 获取 RAG 服务器地址
+2. 通过 `/api/v1/versions` 查询可用 Ghidra 版本
+3. 对 API 和文档进行语义搜索
+4. 查询类的层次结构、方法和字段
+
+完整 skill 规范请参见 `skills/ghidra_rag/SKILL.md`。
+
 ## 许可证
 
 MIT
