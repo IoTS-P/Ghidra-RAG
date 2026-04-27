@@ -100,6 +100,23 @@ cd ghidra_rag_server
 docker-compose up -d
 ```
 
+### 4. Auto-download Ghidra Documentation
+
+Automatically download Ghidra releases and build databases:
+
+```bash
+# CLI
+python scripts/download_ghidra.py list                    # List available versions
+python scripts/download_ghidra.py download 11.3.2        # Download and process version
+
+# Or via API
+GET /api/v1/download/versions     # Get available versions
+POST /api/v1/download            # Start download task (body: {"version": "11.3.2"})
+GET /api/v1/download/status/{id} # Check download status
+```
+
+After download, docs are saved to `docs/{version}/` and databases to `data/{version}/`.
+
 ### 4. Using the Client
 
 ```python

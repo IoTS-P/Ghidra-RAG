@@ -98,6 +98,23 @@ cd ghidra_rag_server
 docker-compose up -d
 ```
 
+### 4. 自动下载 Ghidra 文档
+
+支持从 GitHub 自动下载 Ghidra 发布版并构建数据库：
+
+```bash
+# 命令行方式
+python scripts/download_ghidra.py list                    # 列出可用版本
+python scripts/download_ghidra.py download 11.3.2          # 下载并处理指定版本
+
+# 或通过 API
+GET /api/v1/download/versions     # 获取可用版本列表
+POST /api/v1/download            # 启动下载任务 (body: {"version": "11.3.2"})
+GET /api/v1/download/status/{id}  # 查看下载状态
+```
+
+下载完成后，文档将保存在 `docs/{version}/`，数据库保存在 `data/{version}/`。
+
 ### 4. 使用客户端
 
 ```python

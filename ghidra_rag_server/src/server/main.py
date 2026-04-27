@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database.connection import DatabaseConnection
-from .routers import api_query, doc_search, version
+from .routers import api_query, doc_search, version, download
 
 db = DatabaseConnection()
 
@@ -25,6 +25,7 @@ app.add_middleware(
 app.include_router(api_query.router)
 app.include_router(doc_search.router)
 app.include_router(version.router)
+app.include_router(download.router)
 
 
 @app.get("/")
