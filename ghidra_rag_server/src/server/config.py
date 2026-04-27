@@ -4,13 +4,23 @@ from typing import Optional
 from pydantic_settings import BaseSettings
 
 
+def get_versioned_db_paths(version: str) -> tuple[Path, Path]:
+    base_dir = Path(__file__).parent.parent.parent.parent
+    data_dir = base_dir / "data" / version
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir / "ghidra_rag.db", data_dir / "ghidra_vec.db"
+
+
+def get_default_db_paths() -> tuple[Path, Path]:
+    base_dir = Path(__file__).parent.parent.parent.parent
+    data_dir = base_dir / "data"
+    return data_dir / "ghidra_rag.db", data_dir / "ghidra_vec.db"
+
+
 class Settings(BaseSettings):
     project_root: Path = Path(__file__).parent.parent.parent.parent
     docs_dir: Path = Path(__file__).parent.parent.parent.parent / "docs"
     data_dir: Path = Path(__file__).parent.parent.parent.parent / "data"
-
-    db_path: Path = data_dir / "ghidra_rag.db"
-    vec_db_path: Path = data_dir / "ghidra_vec.db"
 
     default_version: str = "11.3.2"
 
@@ -20,6 +30,14 @@ class Settings(BaseSettings):
 
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_dimension: int = 384
+
+    @property
+    def db_path(self) -> Path:
+        return get_default_db_paths()[0]
+
+    @property
+    def vec_db_path(self) -> Path:
+        return get_default_db_paths()[1]
 
     class Config:
         env_prefix = "GHIDRA_RAG_"

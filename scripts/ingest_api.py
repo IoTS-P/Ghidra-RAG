@@ -6,8 +6,11 @@ import sqlite3
 from bs4 import BeautifulSoup
 
 
-def get_db_path():
-    return Path(__file__).parent.parent / "data" / "ghidra_rag.db"
+def get_db_path(version: str):
+    base_dir = Path(__file__).parent.parent
+    data_dir = base_dir / "data" / version
+    data_dir.mkdir(exist_ok=True)
+    return data_dir / "ghidra_rag.db"
 
 
 class APIParser:
@@ -18,7 +21,7 @@ class APIParser:
         self.processed_classes = 0
         self.processed_methods = 0
         self.processed_fields = 0
-        self.conn = sqlite3.connect(get_db_path())
+        self.conn = sqlite3.connect(get_db_path(version))
         self.conn.row_factory = sqlite3.Row
 
     def close(self):

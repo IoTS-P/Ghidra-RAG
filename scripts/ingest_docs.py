@@ -23,9 +23,11 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
 
 
-def get_db_paths():
+def get_db_paths(version: str):
     base_dir = Path(__file__).parent.parent
-    return {"main": base_dir / "data" / "ghidra_rag.db", "vec": base_dir / "data" / "ghidra_vec.db"}
+    data_dir = base_dir / "data" / version
+    data_dir.mkdir(exist_ok=True)
+    return {"main": data_dir / "ghidra_rag.db", "vec": data_dir / "ghidra_vec.db"}
 
 
 def init_doc_chunks(vec_db_path: Path):
@@ -191,11 +193,18 @@ def get_doc_type(source_file: str) -> str:
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest Ghidra documentation for semantic search")
+    parser.add_argument("--version", default="11.3.2", help="Ghidra version")
+    args = parser.parse_args()
+
+    version = args.version
     base_dir = Path(__file__).parent.parent
     docs_dir = base_dir / "docs"
-    vec_db_path = base_dir / "data" / "ghidra_vec.db"
+    db_paths = get_db_paths(version)
+    vec_db_path = db_paths["vec"]
 
-    version = "11.3.2"
     version_path = docs_dir / version
 
     if not version_path.exists():

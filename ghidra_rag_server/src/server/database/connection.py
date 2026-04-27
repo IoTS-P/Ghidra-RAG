@@ -2,33 +2,44 @@ import sqlite3
 import sqlite_vec
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Optional
 
-from ..config import settings
+from ..config import settings, get_versioned_db_paths
 
 
 class DatabaseConnection:
     _instance = None
-    _db_path: Path = settings.db_path
-    _vec_db_path: Path = settings.vec_db_path
+    _version: Optional[str] = None
 
-    def __new__(cls):
+    def __new__(cls, version: Optional[str] = None):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._initialized = False
+            cls._instance._db_path = None
+            cls._instance._vec_db_path = None
         return cls._instance
 
-    def __init__(self):
-        if self._initialized:
+    def __init__(self, version: Optional[str] = None):
+        if self._initialized and (version is None or version == self._version):
             return
+        self._version = version
         self._initialized = True
         self._ensure_data_dir()
         self._init_databases()
 
     def _ensure_data_dir(self):
-        settings.data_dir.mkdir(parents=True, exist_ok=True)
+        if self._version:
+            data_dir = settings.data_dir / self._version
+        else:
+            data_dir = settings.data_dir
+        data_dir.mkdir(parents=True, exist_ok=True)
 
     def _init_databases(self):
+        if self._version:
+            self._db_path, self._vec_db_path = get_versioned_db_paths(self._version)
+        else:
+            self._db_path = settings.data_dir / "ghidra_rag.db"
+            self._vec_db_path = settings.data_dir / "ghidra_vec.db"
         if not self._db_path.exists():
             self._create_main_db()
 
@@ -65,9 +76,11 @@ class DatabaseConnection:
     def get_vec_cursor(self):
         return self.get_vec_connection().__enter__().cursor()
 
+    def set_version(self, version: str):
+        if version != self._version:
+            self.__init__(version)
 
-db = DatabaseConnection()
 
-
-def get_db():
+def get_db(version: Optional[str] = None) -> DatabaseConnection:
+    db = DatabaseConnection(version)
     return db

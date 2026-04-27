@@ -22,9 +22,11 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
 
 
-def get_db_paths():
+def get_db_paths(version: str):
     base_dir = Path(__file__).parent.parent
-    return {"main": base_dir / "data" / "ghidra_rag.db", "vec": base_dir / "data" / "ghidra_vec.db"}
+    data_dir = base_dir / "data" / version
+    data_dir.mkdir(exist_ok=True)
+    return {"main": data_dir / "ghidra_rag.db", "vec": data_dir / "ghidra_vec.db"}
 
 
 def init_vec_db(vec_db_path: Path):
@@ -112,11 +114,19 @@ def build_method_text(method_data: dict, class_name: str = "") -> str:
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest Ghidra API chunks for semantic search")
+    parser.add_argument("--version", required=True, help="Ghidra version")
+    args = parser.parse_args()
+
+    version = args.version
+
     print("=" * 60)
     print("Ghidra RAG - API Chunks Ingestion")
     print("=" * 60)
 
-    db_paths = get_db_paths()
+    db_paths = get_db_paths(version)
     print(f"\nMain DB: {db_paths['main']}")
     print(f"Vector DB: {db_paths['vec']}")
 
@@ -134,13 +144,6 @@ def main():
     main_conn = sqlite3.connect(db_paths["main"])
     main_conn.row_factory = sqlite3.Row
 
-    cursor = main_conn.cursor()
-    cursor.execute("SELECT version FROM ghidra_versions LIMIT 1")
-    version_row = cursor.fetchone()
-    if not version_row:
-        print("Error: No versions found in database")
-        sys.exit(1)
-    version = version_row[0]
     print(f"Processing version: {version}")
 
     print("\n" + "-" * 60)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sqlite3
+import argparse
 from pathlib import Path
 
 SCHEMA_SQL = """
@@ -120,9 +121,12 @@ CREATE INDEX IF NOT EXISTS idx_examples_status ON method_examples(status);
 """
 
 
-def init_database():
-    data_dir = Path(__file__).parent.parent / "data"
-    data_dir.mkdir(exist_ok=True)
+def init_database(version: str = None):
+    base_dir = Path(__file__).parent.parent
+    data_dir = base_dir / "data"
+    if version:
+        data_dir = data_dir / version
+    data_dir.mkdir(exist_ok=True, parents=True)
 
     db_path = data_dir / "ghidra_rag.db"
     print(f"Creating database at: {db_path}")
@@ -145,4 +149,8 @@ def init_database():
 
 
 if __name__ == "__main__":
-    init_database()
+    parser = argparse.ArgumentParser(description="Initialize Ghidra RAG database")
+    parser.add_argument("--version", help="Ghidra version (creates versioned database)")
+    args = parser.parse_args()
+
+    init_database(version=args.version)

@@ -5,8 +5,9 @@ from .models import DocChunk, SearchResult
 
 
 class DocRepository:
-    def __init__(self):
-        self.db = get_db()
+    def __init__(self, version: Optional[str] = None):
+        self.version = version
+        self.db = get_db(version)
 
     def add_chunk(self, chunk: DocChunk) -> int:
         with self.db.get_vec_connection() as conn:

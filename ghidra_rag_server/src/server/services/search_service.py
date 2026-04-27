@@ -1,6 +1,6 @@
 import json
 from typing import Optional
-from ..config import settings
+from ..config import settings, get_versioned_db_paths
 from ..database.doc_repository import doc_repository
 from ..database.models import DocChunk, SearchResult
 import sqlite3
@@ -74,8 +74,7 @@ class SearchService:
     ) -> list[APISearchResult]:
         query_vector = self.get_embedding(query)
 
-        vec_db_path = settings.vec_db_path
-        main_db_path = settings.db_path
+        vec_db_path, main_db_path = get_versioned_db_paths(version)
 
         results = []
         search_vec = sqlite_vec.serialize_float32(query_vector)
@@ -118,6 +117,7 @@ class SearchService:
                     class_id=class_id,
                     method_id=method_id,
                     score=1.0 - distance,
+                    version=version,
                 )
                 if result and len(results) < top_k:
                     results.append(result)
@@ -125,9 +125,9 @@ class SearchService:
         return results[:top_k]
 
     def _build_api_result(
-        self, chunk_type: str, class_id: Optional[int], method_id: Optional[int], score: float
+        self, chunk_type: str, class_id: Optional[int], method_id: Optional[int], score: float, version: str
     ) -> Optional[APISearchResult]:
-        main_db_path = settings.db_path
+        main_db_path, _ = get_versioned_db_paths(version)
 
         with sqlite3.connect(main_db_path) as main_conn:
             main_conn.row_factory = sqlite3.Row
