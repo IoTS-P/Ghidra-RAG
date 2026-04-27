@@ -1,0 +1,11 @@
+{
+    "rag_server": {
+        "host": "localhost",
+        "port": 8000,
+        "base_url": "http://localhost:8000"
+    },
+    "search": {
+        "default_top_k": 5,
+        "max_top_k": 50
+    }
+}
